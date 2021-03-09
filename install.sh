@@ -143,6 +143,7 @@ fi
 # run post install scripts
 run_postinst() {
   dfmgr_run_post
+  replace "$APPDIR/geany.conf" "replace_home" "$HOME"
 }
 #
 execute "run_postinst" "Running post install scripts"
