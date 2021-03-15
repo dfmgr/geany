@@ -1,28 +1,20 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-APPNAME="{filename}"
-VERSION="{filename}"
-USER="$USER"
-HOME="$HOME"
+PROG="{filename}"
+VERSION="{version}"
+USER="${SUDO_USER:-${USER}}"
+HOME="${USER_HOME:-${HOME}}"
+SRC_DIR="${BASH_SOURCE%/*}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #set opts
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version       : {date}-git
-# @Author        : {developer}
-# @Contact       : {mail}
-# @License       : WTFPL
-# @ReadME        : {filename} --help
-# @Copyright     : Copyright: (c) {year} {developer}, {company}
-# @Created       : {datetime}
-# @File          : {filename}
-# @Description   : {description}
-# @TODO          :
-# @Other         :
-# @Resource      :
+#set opts
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+{fileheader}
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Check for needed applications
-check_app bash || exit 1  # graphical prompt
 cmd_exists bash || exit 1 # exit if not found
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set variables
@@ -30,32 +22,38 @@ cmd_exists bash || exit 1 # exit if not found
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set functions
 printf_color() { printf "%b" "$(tput setaf "$1" 2>/dev/null)" "\t\t$2\n" "$(tput sgr0 2>/dev/null)"; }
-__help() { printf_color "4" "usage: {filename}  |  {filename} --help" && exit; }
+__version() {
+  grep ^"# @" "GEN_SCRIPT_REPLACE_FILENAME"
+  grep ^"##@" "GEN_SCRIPT_REPLACE_FILENAME"
+}
+__help() {
+  printf_color "4" "$(grep ^"# @Description" "GEN_SCRIPT_REPLACE_FILENAME | grep ' : " || GEN_SCRIPT_REPLACE_FILENAME help)"
+  printf_color "4" "usage: GEN_SCRIPT_REPLACE_FILENAME  |  GEN_SCRIPT_REPLACE_FILENAME --version"
+  exit
+}
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set additional variables
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # bring in user config
-[ -f "$HOME/.config/{filename}/settings" ] && . "$HOME/.config/{filename}/settings"
-
+[ -f "$HOME/.config/GEN_SCRIPT_REPLACE_FILENAME/settings" ] && . "$HOME/.config/GEN_SCRIPT_REPLACE_FILENAME/settings"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main application
-
 case "$1" in
---help)
+--help | -h)
   shift 1
   __help
   ;;
---version)
+--version | -v)
   shift 1
-  grep ^"# @" "$APPNAME"
-  grep ^"##@" "$APPNAME"
+  __version
   ;;
 *)
   exec ""
   ;;
 esac
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 exit $?
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # end
+

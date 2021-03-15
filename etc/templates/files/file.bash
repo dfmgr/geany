@@ -1,24 +1,14 @@
 #!/usr/bin/env bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-APPNAME="{filename}"
+PROG="{filename}"
 USER="${SUDO_USER:-${USER}}"
 HOME="${USER_HOME:-${HOME}}"
+SRC_DIR="${BASH_SOURCE%/*}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #set opts
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version       : {date}-git
-# @Author        : {developer}
-# @Contact       : {mail}
-# @License       : WTFPL
-# @ReadME        : {filename} --help
-# @Copyright     : Copyright: (c) {year} {developer}, {company}
-# @Created       : {datetime}
-# @File          : {filename}
-# @Description   : {description}
-# @TODO          :
-# @Other         :
-# @Resource      :
+{fileheader}
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Import functions
 CASJAYSDEVDIR="${CASJAYSDEVDIR:-/usr/local/share/CasjaysDev/scripts}"
@@ -40,9 +30,7 @@ user_install
 __options "$@"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Check for needed applications
-__check_app bash || exit 1  # graphical prompt
 __cmd_exists bash || exit 1 # exit 1 if not found
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set variables
 
@@ -54,12 +42,11 @@ __cmd_exists bash || exit 1 # exit 1 if not found
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # bring in user config
-if [ -f "$HOME/.config/{filename}/settings" ]; then
-  . "$HOME/.config/{filename}/settings"
-fi
+[ -f "$HOME/.config/GEN_SCRIPT_REPLACE_FILENAME/settings" ] && . "$HOME/.config/GEN_SCRIPT_REPLACE_FILENAME/settings"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Main application
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 exit $?
 # end
+

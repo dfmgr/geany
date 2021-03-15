@@ -3,6 +3,7 @@
 APPNAME="{filename}"
 USER="${SUDO_USER:-${USER}}"
 HOME="${USER_HOME:-${HOME}}"
+SRC_DIR="${BASH_SOURCE%/*}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #set opts
 
@@ -49,7 +50,7 @@ unsupported_oses
 scripts_check
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Defaults
-APPNAME="${APPNAME:-{filename}}"
+APPNAME="${APPNAME:-GEN_SCRIPT_REPLACE_FILENAME}"
 APPDIR="${APPDIR:-$HOME/.config/$APPNAME}"
 INSTDIR="${INSTDIR}"
 REPO="${DFMGRREPO:-https://github.com/dfmgr/$APPNAME}"
@@ -65,17 +66,19 @@ dfmgr_req_version "$APPVERSION"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Call the dfmgr function
 dfmgr_install
-dfmgr_run_init
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Script options IE: --help --version
 show_optvars "$@"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Do not update
-#installer_noupdate
+#installer_noupdate "$@"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Requires root - no point in continuing
 #sudoreq  # sudo required
 #sudorun  # sudo optional
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# initialize the installer
+dfmgr_run_init
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # end with a space
 APP="$APPNAME "
@@ -156,3 +159,4 @@ dfmgr_install_version
 # exit
 run_exit
 # end
+
