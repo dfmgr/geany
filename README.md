@@ -5,7 +5,7 @@ DESCRIBE
 Automatic install/update:
 
 ```shell
-bash -c "$(curl -LSs https://github.com/dfmgr/geany/raw/master/install.sh)"
+bash -c "$(curl -LSs https://github.com/dfmgr/geany/raw/main/install.sh)"
 ```
 
 Manual install:
