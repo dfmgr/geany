@@ -59,5 +59,3 @@ context_action_cmd=
 compiler=gcc -Wall -c "%f"
 linker=gnatmake "%e"
 run_cmd="./%e"
-
-

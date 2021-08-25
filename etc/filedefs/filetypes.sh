@@ -19,7 +19,6 @@ here_q=here_doc
 [keywords]
 primary=break case continue do done elif else esac eval exit export fi for function goto if in integer return set shift then until while
 
-
 [settings]
 # default extension used when saving files
 extension=sh
@@ -38,7 +37,7 @@ comment_single=#
 
 # set to false if a comment character/string should start a column 0 of a line, true uses any
 # indentation of the line, e.g. setting to true causes the following on pressing CTRL+d
-	#command_example();
+#command_example();
 # setting to false would generate this
 #	command_example();
 # This setting works only for single line comments

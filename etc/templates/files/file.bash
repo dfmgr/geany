@@ -49,4 +49,3 @@ __cmd_exists bash || exit 1 # exit 1 if not found
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 exit $?
 # end
-

@@ -60,4 +60,3 @@ context_action_cmd=
 # %e will be replaced by the filename without extension
 # (use only one of it at one time)
 compiler=nasm "%f"
-

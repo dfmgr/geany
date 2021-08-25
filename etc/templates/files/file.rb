@@ -7,4 +7,3 @@ class StdClass
 end
 
 x = StdClass.new
-

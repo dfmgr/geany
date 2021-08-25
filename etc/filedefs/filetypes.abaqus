@@ -59,4 +59,3 @@ FT_00_BD=false
 FT_01_LB=Run Job
 FT_01_CM=abaqus job="%f" interactive
 FT_01_BD=false
-
