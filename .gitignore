@@ -1,3 +1,5 @@
 # Disable reminder in prompt
 ignoredirmessage
 geany_socket*
+# ignore commit message
+.gitcommit
