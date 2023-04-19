@@ -1,47 +1,72 @@
 #!/usr/bin/env bash
+# shellcheck shell=bash
+# shellcheck disable=SC2317
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-APPNAME="{filename}"
-USER="${SUDO_USER:-${USER}}"
-HOME="${USER_HOME:-${HOME}}"
-SRC_DIR="${BASH_SOURCE%/*}"
+##@Version           :  {date}-git
+# @@Author           :  {developer}
+# @@Contact          :  {mail}
+# @@License          :  WTFPL
+# @@ReadME           :  {filename} --help
+# @@Copyright        :  Copyright: (c) {year} {developer}, {company}
+# @@Created          :  {datetime}
+# @@File             :  {filename}
+# @@Description      :  {description}
+# @@Changelog        :  newScript
+# @@TODO             :  Refactor code
+# @@Other            :
+# @@Resource         :
+# @@Terminal App     :  no
+# @@sudo/root        :  no
+# @@Template         :  installers/dfmgr
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#set opts
-
+APPNAME="$(basename "{filename}")"
+VERSION="{date}-git"
+HOME="${USER_HOME:-$HOME}"
+USER="${SUDO_USER:-$USER}"
+RUN_USER="${SUDO_USER:-$USER}"
+SCRIPT_SRC_DIR="${BASH_SOURCE%/*}"
+export SCRIPTS_PREFIX="dfmgr"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version       : {date}-git
-# @Author        : {developer}
-# @Contact       : {mail}
-# @License       : LICENSE.md
-# @ReadME        : README.md
-# @Copyright     : Copyright: (c) {year} {developer}, {company}
-# @Created       : {datetime}
-# @File          : {filename}
-# @Description   : {description}
-# @TODO          :
-# @Other         :
-# @Resource      :
+# Set bash options
+#if [ ! -t 0 ] && { [ "$1" = --term ] || [ $# = 0 ]; }; then { [ "$1" = --term ] && shift 1 || true; } && TERMINAL_APP="TRUE" myterminal -e "$APPNAME $*" && exit || exit 1; fi
+[ "$1" = "--debug" ] && set -x && export SCRIPT_OPTS="--debug" && export _DEBUG="on"
+[ "$1" = "--raw" ] && export SHOW_RAW="true"
+set -o pipefail
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Import functions
 CASJAYSDEVDIR="${CASJAYSDEVDIR:-/usr/local/share/CasjaysDev/scripts}"
 SCRIPTSFUNCTDIR="${CASJAYSDEVDIR:-/usr/local/share/CasjaysDev/scripts}/functions"
-SCRIPTSFUNCTFILE="${SCRIPTSAPPFUNCTFILE:-app-installer.bash}"
-SCRIPTSFUNCTURL="${SCRIPTSAPPFUNCTURL:-https://github.com/dfmgr/installer/raw/main/functions}"
-connect_test() { ping -c1 1.1.1.1 &>/dev/null || curl --disable -LSs --connect-timeout 3 --retry 0 --max-time 1 1.1.1.1 2>/dev/null | grep -e "HTTP/[0123456789]" | grep -q "200" -n1 &>/dev/null; }
+SCRIPTSFUNCTFILE="${SCRIPTSAPPFUNCTFILE:-mgr-installers.bash}"
+SCRIPTSFUNCTURL="${SCRIPTSAPPFUNCTURL:-https://github.com/dfmgr/installer/raw/GEN_SCRIPT_REPLACE_DEFAULT_BRANCH/functions}"
+connect_test() { curl -q -ILSsf --retry 1 -m 1 "https://1.1.1.1" | grep -iq 'server:*.cloudflare' || return 1; }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ -f "$PWD/$SCRIPTSFUNCTFILE" ]; then
   . "$PWD/$SCRIPTSFUNCTFILE"
 elif [ -f "$SCRIPTSFUNCTDIR/$SCRIPTSFUNCTFILE" ]; then
   . "$SCRIPTSFUNCTDIR/$SCRIPTSFUNCTFILE"
 elif connect_test; then
-  curl -LSs "$SCRIPTSFUNCTURL/$SCRIPTSFUNCTFILE" -o "/tmp/$SCRIPTSFUNCTFILE" || exit 1
+  curl -q -LSsf "$SCRIPTSFUNCTURL/$SCRIPTSFUNCTFILE" -o "/tmp/$SCRIPTSFUNCTFILE" || exit 1
   . "/tmp/$SCRIPTSFUNCTFILE"
 else
   echo "Can not load the functions file: $SCRIPTSFUNCTDIR/$SCRIPTSFUNCTFILE" 1>&2
-  exit 1
+  exit 90
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Define pre-install scripts
+run_pre_install() {
+  local preExitCode=0
+
+  return $preExitCode
+}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Define custom functions
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Call the main function
-user_installdirs
+dfmgr_install
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# trap the cleanup function
+trap_exit
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # OS Support: supported_os unsupported_oses
 unsupported_oses
@@ -50,22 +75,23 @@ unsupported_oses
 scripts_check
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Defaults
-APPNAME="${APPNAME:-GEN_SCRIPT_REPLACE_FILENAME}"
-APPDIR="${APPDIR:-$HOME/.config/$APPNAME}"
-INSTDIR="${INSTDIR}"
-REPO="${DFMGRREPO:-https://github.com/dfmgr/$APPNAME}"
-REPORAW="${REPORAW:-$REPO/raw}"
-APPVERSION="$(__appversion "$REPORAW/master/version.txt")"
+APPNAME="${APPNAME:-{filename}}"
+APPDIR="$CONF/$APPNAME"
+INSTDIR="$CASJAYSDEVSHARE/dfmgr/$APPNAME"
+REPO_BRANCH="${GIT_REPO_BRANCH:-main}"
+REPO="${DFMGR:-https://github.com/dfmgr}/$APPNAME"
+REPORAW="$REPO/raw/$REPO_BRANCH"
+APPVERSION="$(__appversion "$REPORAW/version.txt")"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Setup plugins
 PLUGNAMES=""
 PLUGDIR="${SHARE:-$HOME/.local/share}/$APPNAME"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Export variables
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Require a version higher than
 dfmgr_req_version "$APPVERSION"
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Call the dfmgr function
-dfmgr_install
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Script options IE: --help --version
 show_optvars "$@"
@@ -74,19 +100,27 @@ show_optvars "$@"
 #installer_noupdate "$@"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Requires root - no point in continuing
-#sudoreq  # sudo required
+#sudoreq "$0 *" # sudo required
 #sudorun  # sudo optional
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# initialize the installer
+# Initialize the installer
 dfmgr_run_init
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Run pre-install commands
+execute "run_pre_install" "Running pre-installation commands"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # end with a space
 APP="$APPNAME "
+AUR=""
 PERL=""
 PYTH=""
 PIPS=""
 CPAN=""
 GEMS=""
+NPM=""
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# install required packages using the aur - Requires yay to be installed
+install_aur "$AUR"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # install packages - useful for package that have the same name on all oses
 install_packages "$APP"
@@ -109,8 +143,11 @@ install_cpan "$CPAN"
 # check for ruby binaries and install using ruby package manager
 install_gem "$GEMS"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# check for npm binaries and install using node package manager
+install_npm "$NPM"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Other dependencies
-dotfilesreq git misc
+dotfilesreq
 dotfilesreqadmin
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Ensure directories exist
@@ -122,24 +159,23 @@ if [ -d "$APPDIR" ]; then
   execute "backupapp $APPDIR $APPNAME" "Backing up $APPDIR"
 fi
 # Main progam
-if am_i_online; then
+if __am_i_online; then
   if [ -d "$INSTDIR/.git" ]; then
     execute "git_update $INSTDIR" "Updating $APPNAME configurations"
   else
-    execute "git_clone $REPO/$APPNAME $INSTDIR" "Installing $APPNAME configurations"
+    execute "git_clone $REPO $INSTDIR" "Installing $APPNAME configurations"
   fi
   # exit on fail
   failexitcode $? "Git has failed"
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Plugins
-if am_i_online; then
+if __am_i_online; then
   if [ "$PLUGNAMES" != "" ]; then
-    if [ -d "$PLUGDIR"/PLUREP/.git ]; then
+    if [ -d "$PLUGDIR/PLUREP/.git" ]; then
       execute "git_update $PLUGDIR/PLUGREP" "Updating plugin PLUGNAME"
     else
-      execute
-      "git_clone PLUGINREPO $PLUGDIR/PLUGREP" "Installing plugin PLUGREP"
+      execute "git_clone PLUGINREPO $PLUGDIR/PLUGREP" "Installing plugin PLUGREP"
     fi
   fi
   # exit on fail
@@ -150,12 +186,34 @@ fi
 run_postinst() {
   dfmgr_run_post
 }
-#
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# run post install scripts
 execute "run_postinst" "Running post install scripts"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Output post install message
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # create version file
 dfmgr_install_version
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# exit
+# run exit function
 run_exit
-# end
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# run any external scripts
+if ! cmd_exists "$APPNAME" && [ -f "$INSTDIR/build.sh" ]; then
+  if builtin cd "$PLUGDIR/source"; then
+    BUILD_SCRIPT_SRC_DIR="$PLUGDIR/source"
+    BUILD_SRC_URL=""
+    export BUILD_SCRIPT_SRC_DIR BUILD_SRC_URL
+    eval "$INSTDIR/build.sh"
+  fi
+  cmd_exists $APPNAME || printf_red "$APPNAME is not installed: run $INSTDIR/build.sh"
+fi
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# lets exit with code
+exit ${EXIT:-$exitCode}
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# End application
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# ex: ts=2 sw=2 et filetype=sh
